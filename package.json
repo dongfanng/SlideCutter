@@ -1,0 +1,13 @@
+{
+  "name": "slidecutter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "本地 PPT 素材智能切片工具（纯前端，数据不出本机）",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

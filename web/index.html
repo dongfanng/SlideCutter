@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SlideCutter · PPT 素材切片</title>
+  <link rel="stylesheet" href="/web/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>SlideCutter</h1>
+      <span class="sub">本地 PPT 素材智能切片 · 图片全程在本机处理</span>
+    </header>
+
+    <main class="layout">
+      <section class="preview-col">
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="拖入图片或点击选择">
+          <div class="dz-inner">
+            <div class="dz-icon">＋</div>
+            <p class="dz-title">拖入图片到这里，或点击选择文件</p>
+            <p class="dz-hint">支持 PNG / JPG / GIF / WebP · 白底整图素材</p>
+          </div>
+        </div>
+        <div id="stage" class="stage" hidden>
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="status" class="status"></div>
+      </section>
+
+      <aside class="side-col">
+        <section class="card">
+          <h2>检测参数</h2>
+          <div class="field">
+            <label for="bg">背景色</label>
+            <input type="color" id="bg" value="#ffffff">
+          </div>
+          <div class="field">
+            <label for="tolerance">容差 <span id="toleranceVal">30</span></label>
+            <input type="range" id="tolerance" min="0" max="120" value="30">
+          </div>
+          <div class="field">
+            <label for="minSize">最小尺寸 <span id="minSizeVal">16</span>px</label>
+            <input type="range" id="minSize" min="1" max="120" value="16">
+          </div>
+          <div class="field">
+            <label for="connectivity">连通邻域</label>
+            <select id="connectivity">
+              <option value="8" selected>8 邻域（默认）</option>
+              <option value="4">4 邻域</option>
+            </select>
+          </div>
+          <div class="field checkbox">
+            <label for="peelBlack"><input type="checkbox" id="peelBlack"> 剥离黑色边缘</label>
+          </div>
+          <div class="field checkbox">
+            <label for="preserveWhite"><input type="checkbox" id="preserveWhite"> 保留白色像素（不去白底）</label>
+          </div>
+          <div class="field checkbox">
+            <label for="filterText"><input type="checkbox" id="filterText"> 过滤文字内容</label>
+          </div>
+          <div class="field">
+            <label for="textFillRatio">文字填充率 <span id="textFillRatioVal">0.35</span></label>
+            <input type="range" id="textFillRatio" min="0.05" max="0.9" step="0.05" value="0.35">
+          </div>
+          <div class="field">
+            <label for="textMaxHeight">文字最大高度 <span id="textMaxHeightVal">24</span>px</label>
+            <input type="range" id="textMaxHeight" min="8" max="80" value="24">
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>操作</h2>
+          <div class="btnrow">
+            <button id="btnReset" class="btn">重置参数</button>
+            <button id="btnExport" class="btn primary" disabled>导出 ZIP</button>
+          </div>
+          <div class="btnrow">
+            <button id="btnMerge" class="btn" disabled>合并选中</button>
+            <button id="btnExclude" class="btn" disabled>排除选中</button>
+          </div>
+          <p class="hint">在画布点击切割框选择；Ctrl / Shift / ⌘ 多选。<br>合并：把多个选中框并为一个元素；排除：不导出该元素。</p>
+        </section>
+
+        <section class="card">
+          <h2>元素列表 <span id="count" class="count"></span></h2>
+          <ul id="list" class="list"></ul>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <script src="/jszip.min.js"></script>
+  <script type="module" src="/web/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+:root {
+  --bg: #f4f5f7;
+  --panel: #ffffff;
+  --border: #e2e4e9;
+  --text: #1f2329;
+  --muted: #7a8190;
+  --accent: #2f80ed;
+  --danger: #ff6b35;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app { max-width: 1280px; margin: 0 auto; padding: 16px; }
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 4px 16px;
+}
+.topbar h1 { margin: 0; font-size: 22px; }
+.topbar .sub { color: var(--muted); font-size: 13px; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* ---------- 预览区 ---------- */
+.preview-col { min-width: 0; }
+
+.dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color .15s, background .15s;
+  outline: none;
+}
+.dropzone:hover, .dropzone:focus, .dropzone.drag {
+  border-color: var(--accent);
+  background: #f0f6ff;
+}
+.dz-icon {
+  font-size: 40px;
+  color: var(--accent);
+  line-height: 1;
+}
+.dz-title { margin: 12px 0 4px; font-size: 15px; }
+.dz-hint { margin: 0; color: var(--muted); font-size: 13px; }
+
+.stage {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  max-height: 72vh;
+  overflow: auto;
+}
+#canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  background: #fff;
+}
+
+.status {
+  padding: 8px 4px 0;
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 20px;
+}
+
+/* ---------- 侧栏 ---------- */
+.side-col { display: flex; flex-direction: column; gap: 12px; }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.count {
+  font-size: 12px;
+  color: var(--accent);
+  background: #eaf2fe;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.field { margin-bottom: 12px; }
+.field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.field label span { color: var(--muted); }
+.field input[type="color"] {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+  background: #fff;
+  cursor: pointer;
+}
+.field input[type="range"] { width: 100%; }
+.field select {
+  width: 100%;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 8px;
+}
+.field.checkbox label { justify-content: flex-start; gap: 8px; margin: 0; cursor: pointer; }
+
+.btnrow { display: flex; gap: 8px; margin-bottom: 8px; }
+.btn {
+  flex: 1;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover:not(:disabled) { background: #2769c9; color: #fff; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.hint { margin: 6px 0 0; font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+.list { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow: auto; }
+.list .item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--muted);
+}
+.list .item:hover { background: #f2f4f7; }
+.list .item.selected { background: #eaf2fe; color: var(--accent); }
+.list .item.excluded { text-decoration: line-through; opacity: .5; }
+.list .idx {
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.list .info { flex: 1; }
+.list .pos { font-variant-numeric: tabular-nums; }
