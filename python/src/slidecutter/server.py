@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import os
+from urllib.parse import quote
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -45,6 +46,16 @@ app.add_middleware(
 )
 
 
+def _content_disposition(filename: str) -> str:
+    """生成 Content-Disposition，兼容中文文件名（RFC 5987 filename*）。"""
+    try:
+        filename.encode("ascii")
+        plain = filename
+    except UnicodeEncodeError:
+        plain = "slide.pptx"
+    return f"attachment; filename=\"{plain}\"; filename*=UTF-8''{quote(filename)}"
+
+
 @app.post("/api/build-ppt")
 def build_ppt(req: LayoutRequest) -> Response:
     if not req.elements:
@@ -64,11 +75,11 @@ def build_ppt(req: LayoutRequest) -> Response:
         ],
     }
     buf = build_pptx_bytes(layout, images, req.scale)
-    name = f"{req.source.rsplit('.', 1)[0]}-slide.pptx"
+    name = f"{req.source.rsplit('.', 1)[0] or 'slide'}-slide.pptx"
     return Response(
         content=buf.getvalue(),
         media_type=PPTX_MIME,
-        headers={"Content-Disposition": f'attachment; filename="{name}"'},
+        headers={"Content-Disposition": _content_disposition(name)},
     )
 
 

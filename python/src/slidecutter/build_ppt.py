@@ -51,9 +51,10 @@ def build_pptx_bytes(layout: dict, images: Mapping[str, bytes], scale: float = 1
 
     images 为 { 元素文件名: PNG 字节 } 的映射，缺图时跳过并告警。
     """
-    # 画布尺寸：优先用 layout 记录的像素宽高，缺省回退到标准 16:9
-    width_in = layout.get("width", DEFAULT_SLIDE_W * PX_PER_INCH) / PX_PER_INCH * scale
-    height_in = layout.get("height", DEFAULT_SLIDE_H * PX_PER_INCH) / PX_PER_INCH * scale
+    # 画布尺寸：优先用 layout 记录的像素宽高，缺省回退到标准 16:9；
+    # python-pptx 要求边长在 1~56 英寸之间，过小的画布钳制到下限。
+    width_in = max(1.0, layout.get("width", DEFAULT_SLIDE_W * PX_PER_INCH) / PX_PER_INCH * scale)
+    height_in = max(1.0, layout.get("height", DEFAULT_SLIDE_H * PX_PER_INCH) / PX_PER_INCH * scale)
 
     prs = Presentation()
     prs.slide_width = Inches(width_in)
