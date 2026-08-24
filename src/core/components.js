@@ -14,7 +14,7 @@
  * @param {number} [options.textFillRatio]  文字填充率阈值（面积/包围盒面积），默认 0.35
  * @param {number} [options.textAreaRatio]  文字面积上限（相对最大元素面积的比例），默认 0.15
  * @param {number} [options.textMaxHeight]  文字横条最大高度（px），默认 24
- * @returns {Array<{x:number,y:number,width:number,height:number,area:number,label:number,text:boolean}>}
+ * @returns {Array<{x:number,y:number,width:number,height:number,area:number,text:boolean}>}
  *          包围盒已按 (上→下, 左→右) 排序，且紧贴内容像素；text=true 表示判定为文字。
  */
 export function findComponents(mask, width, height, options = {}) {
@@ -103,7 +103,7 @@ export function findComponents(mask, width, height, options = {}) {
     const h = s.maxY - s.minY + 1;
     // 宽或高达到最小尺寸即保留（细长线条如分隔线不被误过滤）
     if (w < minSize && h < minSize) continue;
-    boxes.push({ x: s.minX, y: s.minY, width: w, height: h, area: s.count, label: root, text: false });
+    boxes.push({ x: s.minX, y: s.minY, width: w, height: h, area: s.count, text: false });
   }
   boxes.sort((a, b) => (a.y - b.y) || (a.x - b.x));
 

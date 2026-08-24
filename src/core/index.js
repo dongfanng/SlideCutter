@@ -2,18 +2,11 @@
  * 核心算法层统一出口。全部为纯函数，仅操作 RGBA 像素数组，
  * 浏览器端与 Cloudflare Workers 均可直接复用。
  */
-import { buildMask, parseColor, externalBackgroundMask } from './mask.js';
+import { buildMask, externalBackgroundMask } from './mask.js';
 import { findComponents } from './components.js';
 import { extractRegion, peelBlackBorder } from './trim.js';
 
-export {
-  buildMask,
-  parseColor,
-  externalBackgroundMask,
-  findComponents,
-  extractRegion,
-  peelBlackBorder,
-};
+export { extractRegion, peelBlackBorder };
 
 /**
  * 一键分析：内容掩码 + 外部背景掩码 + 连通域包围盒。

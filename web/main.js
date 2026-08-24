@@ -23,7 +23,7 @@ const state = {
   image: null,        // HTMLImageElement
   imageData: null,    // { width, height, data }
   sourceName: '',
-  boxes: [],          // { x, y, width, height, area, label }
+  boxes: [],          // { x, y, width, height, area, text }
   mask: null,         // 内容掩码，导出时复用
   external: null,     // 外部背景掩码（去白底时保留内部孔洞），导出时复用
   selected: new Set(),
@@ -167,8 +167,7 @@ canvas.addEventListener('click', (e) => {
   const hit = hitTest(px, py);
   const multi = e.ctrlKey || e.metaKey || e.shiftKey;
   if (hit === -1) {
-    if (multi) state.selected.clear();
-    else state.selected.clear();
+    state.selected.clear();
     render();
     renderList();
     updateButtons();
@@ -190,7 +189,7 @@ function mergeSelected() {
     maxY = Math.max(maxY, b.y + b.height);
     if (b.text) text = true; // 任一来源为文字，则合并结果保留文字标记
   }
-  const merged = { x: minX, y: minY, width: maxX - minX, height: maxY - minY, area: 0, label: 0, text };
+  const merged = { x: minX, y: minY, width: maxX - minX, height: maxY - minY, area: 0, text };
   const boxes = state.boxes.filter((_, i) => !state.selected.has(i));
   boxes.push(merged);
   boxes.sort((a, b) => (a.y - b.y) || (a.x - b.x));
