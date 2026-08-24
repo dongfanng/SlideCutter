@@ -5,7 +5,8 @@
   "description": "本地 PPT 素材智能切片工具（纯前端，数据不出本机）",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "build": "mkdir -p web/vendor && cp node_modules/jszip/dist/jszip.min.js node_modules/pptxgenjs/dist/pptxgen.min.js web/vendor/",
+    "start": "npm run build && node server.js"
   },
   "dependencies": {
     "jszip": "^3.10.1",

@@ -47,14 +47,6 @@ function handler(req, res) {
   }
   if (urlPath === '/') urlPath = '/web/index.html';
 
-  // JSZip / PptxGenJS：从 node_modules 提供 UMD 构建（避免额外复制文件）
-  if (urlPath === '/jszip.min.js') {
-    return sendFile(res, path.join(ROOT, 'node_modules', 'jszip', 'dist', 'jszip.min.js'));
-  }
-  if (urlPath === '/pptxgen.min.js') {
-    return sendFile(res, path.join(ROOT, 'node_modules', 'pptxgenjs', 'dist', 'pptxgen.min.js'));
-  }
-
   const filePath = path.resolve(ROOT, '.' + urlPath);
   if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
     res.writeHead(403);

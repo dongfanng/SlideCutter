@@ -1,6 +1,9 @@
 # 依赖
 node_modules/
 
+# 构建产物（由 npm run build 从 node_modules 复制）
+web/vendor/
+
 # 系统文件
 .DS_Store
 Thumbs.db
