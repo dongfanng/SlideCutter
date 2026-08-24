@@ -20,3 +20,6 @@ Thumbs.db
 # 环境变量（含密钥）
 .env
 .env.*
+
+# 输出目录
+output/
