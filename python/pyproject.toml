@@ -5,10 +5,13 @@ description = "SlideCutter Python 版本：读取 layout.json，用 python-pptx 
 requires-python = ">=3.12"
 dependencies = [
     "python-pptx>=1.0.2",
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
 ]
 
 [project.scripts]
 slidecutter-build = "slidecutter.build_ppt:main"
+slidecutter-server = "slidecutter.server:run"
 
 [build-system]
 requires = ["hatchling"]

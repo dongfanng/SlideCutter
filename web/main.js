@@ -2,6 +2,9 @@ import { analyze, extractRegion } from '../src/core/index.js';
 
 const $ = (id) => document.getElementById(id);
 
+// PPT 构建服务地址（独立部署，见 python/ 目录：uv run slidecutter-server）
+const PPT_SERVICE_URL = 'http://localhost:8000';
+
 const canvas = $('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -243,6 +246,7 @@ function renderList() {
 
 function updateButtons() {
   $('btnExport').disabled = !state.imageData || state.boxes.length === 0;
+  $('btnPpt').disabled = !state.imageData || state.boxes.length === 0;
   $('btnMerge').disabled = state.selected.size < 2;
   $('btnExclude').disabled = state.selected.size === 0;
 }
@@ -301,14 +305,13 @@ function baseName(name) {
   return name.replace(/\.[^.]+$/, '');
 }
 
-function regionToBlob(region) {
+function regionToDataUrl(region) {
   const c = document.createElement('canvas');
   c.width = region.width;
   c.height = region.height;
   const cx = c.getContext('2d');
-  const id = new ImageData(region.data, region.width, region.height);
-  cx.putImageData(id, 0, 0);
-  return new Promise((resolve) => c.toBlob(resolve, 'image/png'));
+  cx.putImageData(new ImageData(region.data, region.width, region.height), 0, 0);
+  return c.toDataURL('image/png');
 }
 
 function downloadBlob(blob, name) {
@@ -319,25 +322,23 @@ function downloadBlob(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-async function exportZip() {
-  const zip = new JSZip();
+// 收集中间产物：layout + 各元素 PNG（base64 dataURL），供 ZIP / PPT 复用
+async function collectExport() {
   const layout = {
     source: state.sourceName,
     width: state.imageData.width,
     height: state.imageData.height,
     elements: [],
   };
+  const images = {};
   const items = state.boxes
     .map((b, i) => ({ b, i }))
     .filter(({ i }) => !state.excluded.has(i))
     .sort((a, b) => (a.b.y - b.b.y) || (a.b.x - b.b.x));
-
-  $('status').textContent = `正在导出 ${items.length} 个元素…`;
   for (let k = 0; k < items.length; k++) {
     const { b, i } = items[k];
     const name = `element-${String(k + 1).padStart(2, '0')}.png`;
     const region = extractRegion(state.imageData, b, { ...params, mask: state.mask, external: state.external });
-    zip.file(name, await regionToBlob(region));
     layout.elements.push({
       file: name,
       index: i,
@@ -346,17 +347,60 @@ async function exportZip() {
       width: region.box.width,
       height: region.box.height,
     });
+    images[name] = regionToDataUrl(region);
+  }
+  return { layout, images };
+}
+
+async function exportZip() {
+  const { layout, images } = await collectExport();
+  const zip = new JSZip();
+  for (const [name, dataUrl] of Object.entries(images)) {
+    zip.file(name, dataUrl.split(',')[1], { base64: true });
   }
   zip.file('layout.json', JSON.stringify(layout, null, 2));
   const blob = await zip.generateAsync({ type: 'blob' });
   downloadBlob(blob, `${baseName(state.sourceName)}-sliced.zip`);
-  $('status').textContent = `已导出 ${items.length} 个元素 → ${baseName(state.sourceName)}-sliced.zip`;
+  $('status').textContent = `已导出 ${layout.elements.length} 个元素 → ${baseName(state.sourceName)}-sliced.zip`;
+}
+
+async function downloadPpt() {
+  $('status').textContent = '正在生成 PPT…';
+  try {
+    const { layout, images } = await collectExport();
+    const payload = {
+      source: layout.source,
+      width: layout.width,
+      height: layout.height,
+      scale: 1,
+      elements: layout.elements.map((el) => ({
+        file: el.file,
+        x: el.x,
+        y: el.y,
+        width: el.width,
+        height: el.height,
+        data: images[el.file].split(',')[1],
+      })),
+    };
+    const res = await fetch(`${PPT_SERVICE_URL}/api/build-ppt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`服务返回 ${res.status}`);
+    const blob = await res.blob();
+    downloadBlob(blob, `${baseName(state.sourceName)}-slide.pptx`);
+    $('status').textContent = `已生成 PPT → ${baseName(state.sourceName)}-slide.pptx`;
+  } catch (err) {
+    $('status').textContent = `生成 PPT 失败：${err.message}（需运行 cd python && uv run slidecutter-server）`;
+  }
 }
 
 /* ---------------- 初始化 ---------------- */
 
 $('btnReset').addEventListener('click', resetParams);
 $('btnExport').addEventListener('click', exportZip);
+$('btnPpt').addEventListener('click', downloadPpt);
 $('btnMerge').addEventListener('click', mergeSelected);
 $('btnExclude').addEventListener('click', toggleExclude);
 bindParams();

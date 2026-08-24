@@ -19,8 +19,10 @@ layout.json 由前端切片工具导出，结构示例：
 from __future__ import annotations
 
 import argparse
+import io
 import json
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 
 from pptx import Presentation
@@ -44,12 +46,11 @@ def load_layout(layout_path: Path) -> dict:
     return layout
 
 
-def build_ppt(layout_path: Path, output_path: Path, scale: float = 1.0) -> Path:
-    """按 layout.json 生成 PPT，返回输出文件路径。"""
-    layout_dir = layout_path.parent
-    layout = load_layout(layout_path)
-    elements = layout["elements"]
+def build_pptx_bytes(layout: dict, images: Mapping[str, bytes], scale: float = 1.0) -> io.BytesIO:
+    """核心：按 layout 与图片字节生成 .pptx，返回内存中的 BytesIO。
 
+    images 为 { 元素文件名: PNG 字节 } 的映射，缺图时跳过并告警。
+    """
     # 画布尺寸：优先用 layout 记录的像素宽高，缺省回退到标准 16:9
     width_in = layout.get("width", DEFAULT_SLIDE_W * PX_PER_INCH) / PX_PER_INCH * scale
     height_in = layout.get("height", DEFAULT_SLIDE_H * PX_PER_INCH) / PX_PER_INCH * scale
@@ -59,22 +60,38 @@ def build_ppt(layout_path: Path, output_path: Path, scale: float = 1.0) -> Path:
     prs.slide_height = Inches(height_in)
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # 6 = 空白版式
 
-    for el in elements:
+    for el in layout["elements"]:
         file = el.get("file")
-        if not file:
-            continue
-        img_path = layout_dir / file
-        if not img_path.is_file():
+        data = images.get(file) if file else None
+        if not data:
             print(f"[警告] 跳过缺失素材：{file}", file=sys.stderr)
             continue
         left = Inches(el["x"] / PX_PER_INCH * scale)
         top = Inches(el["y"] / PX_PER_INCH * scale)
         width = Inches(el["width"] / PX_PER_INCH * scale)
         height = Inches(el["height"] / PX_PER_INCH * scale)
-        slide.shapes.add_picture(str(img_path), left, top, width, height)
+        slide.shapes.add_picture(io.BytesIO(data), left, top, width, height)
 
-    prs.save(output_path)
-    print(f"已生成 {output_path}（{len(elements)} 个元素）")
+    buf = io.BytesIO()
+    prs.save(buf)
+    buf.seek(0)
+    return buf
+
+
+def build_ppt(layout_path: Path, output_path: Path, scale: float = 1.0) -> Path:
+    """CLI 入口：从磁盘读取 layout.json 与素材图片，写出 .pptx。"""
+    layout = load_layout(layout_path)
+    images: dict[str, bytes] = {}
+    for el in layout["elements"]:
+        file = el.get("file")
+        if not file:
+            continue
+        img_path = layout_path.parent / file
+        if img_path.is_file():
+            images[file] = img_path.read_bytes()
+
+    output_path.write_bytes(build_pptx_bytes(layout, images, scale).getvalue())
+    print(f"已生成 {output_path}（{len(layout['elements'])} 个元素）")
     return output_path
 
 
