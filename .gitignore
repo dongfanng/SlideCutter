@@ -1,6 +1,10 @@
 # 依赖
 node_modules/
 
+# Python（uv）
+.venv/
+__pycache__/
+
 # 系统文件
 .DS_Store
 Thumbs.db
