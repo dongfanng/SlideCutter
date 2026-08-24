@@ -45,7 +45,7 @@ function handler(req, res) {
     res.end('Bad Request');
     return;
   }
-  if (urlPath === '/') urlPath = '/web/index.html';
+  if (urlPath === '/') urlPath = '/index.html';
 
   const filePath = path.resolve(ROOT, '.' + urlPath);
   if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
