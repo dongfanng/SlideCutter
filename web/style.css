@@ -27,6 +27,13 @@ body {
 }
 .topbar h1 { margin: 0; font-size: 22px; }
 .topbar .sub { color: var(--muted); font-size: 13px; }
+.topbar .github {
+  margin-left: auto;
+  align-self: center;
+  color: var(--muted);
+  line-height: 0;
+}
+.topbar .github:hover { color: var(--text); }
 
 .layout {
   display: grid;
