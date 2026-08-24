@@ -2,9 +2,6 @@ import { analyze, extractRegion } from '../src/core/index.js';
 
 const $ = (id) => document.getElementById(id);
 
-// PPT 构建服务地址（独立部署，见 python/ 目录：uv run slidecutter-server）
-const PPT_SERVICE_URL = 'http://localhost:8000';
-
 const canvas = $('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -368,31 +365,29 @@ async function downloadPpt() {
   $('status').textContent = '正在生成 PPT…';
   try {
     const { layout, images } = await collectExport();
-    const payload = {
-      source: layout.source,
-      width: layout.width,
-      height: layout.height,
-      scale: 1,
-      elements: layout.elements.map((el) => ({
-        file: el.file,
-        x: el.x,
-        y: el.y,
-        width: el.width,
-        height: el.height,
-        data: images[el.file].split(',')[1],
-      })),
-    };
-    const res = await fetch(`${PPT_SERVICE_URL}/api/build-ppt`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    // 像素 → 英寸（96 DPI），与导出 ZIP 的 layout.json 单位一致
+    const px = 96;
+    const pptx = new PptxGenJS();
+    pptx.defineLayout({
+      name: 'SC_LAYOUT',
+      width: layout.width / px,
+      height: layout.height / px,
     });
-    if (!res.ok) throw new Error(`服务返回 ${res.status}`);
-    const blob = await res.blob();
-    downloadBlob(blob, `${baseName(state.sourceName)}-slide.pptx`);
-    $('status').textContent = `已生成 PPT → ${baseName(state.sourceName)}-slide.pptx`;
+    pptx.layout = 'SC_LAYOUT';
+    const slide = pptx.addSlide();
+    for (const el of layout.elements) {
+      slide.addImage({
+        data: images[el.file],
+        x: el.x / px,
+        y: el.y / px,
+        w: el.width / px,
+        h: el.height / px,
+      });
+    }
+    await pptx.writeFile({ fileName: `${baseName(layout.source)}-slide.pptx` });
+    $('status').textContent = `已生成 PPT → ${baseName(layout.source)}-slide.pptx（浏览器本地生成）`;
   } catch (err) {
-    $('status').textContent = `生成 PPT 失败：${err.message}（需运行 cd python && uv run slidecutter-server）`;
+    $('status').textContent = `生成 PPT 失败：${err.message}`;
   }
 }
 

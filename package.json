@@ -8,6 +8,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "pptxgenjs": "^4.0.1"
   }
 }

@@ -80,7 +80,7 @@
             <button id="btnMerge" class="btn" disabled>合并选中</button>
             <button id="btnExclude" class="btn" disabled>排除选中</button>
           </div>
-          <p class="hint">在画布点击切割框选择；Ctrl / Shift / ⌘ 多选。<br>合并：把多个选中框并为一个元素；排除：不导出该元素。<br>下载 PPT 需本机运行构建服务（<code>cd python && uv run slidecutter-server</code>）。</p>
+          <p class="hint">在画布点击切割框选择；Ctrl / Shift / ⌘ 多选。<br>合并：把多个选中框并为一个元素；排除：不导出该元素。<br>下载 PPT 在浏览器本地生成，无需安装任何环境。</p>
         </section>
 
         <section class="card">
@@ -93,6 +93,7 @@
 
   <input type="file" id="fileInput" accept="image/*" hidden>
   <script src="/jszip.min.js"></script>
+  <script src="/pptxgen.min.js"></script>
   <script type="module" src="/web/main.js"></script>
 </body>
 </html>
